@@ -96,13 +96,49 @@ int kmp(string T, string P) {
     return -1;
 }
 
+// res: result vector for holding indexes.
+void kmp_multi(string T, string P, vector<int>& res) {
+    // reset result vector
+    res.clear();
+    // calculate NEXT array
+    deque<int> NEXT;
+    maxlen_prefix_suffix(P, NEXT);
+
+    int LT = T.size();
+    int LP = P.size();
+
+    int i = 0;
+    int j = 0;
+
+    while (i < LT) {
+        //printf("i:%d\n", i);
+        int cand = i;
+        while (j < LP and i < LT and T[i] == P[j]) {
+            i++;
+            j++;
+        }
+        if (j >= LP) {
+            //printf("%d\n", cand);
+            res.push_back(cand);
+            j = NEXT[LP - 1];
+        } else {
+            if (j - 1 >= 0) {
+                j = NEXT[j - 1];
+            } else {
+                i++;
+            }
+        }
+    }
+
+}
+
 int main() {
     // test kmp
     
     // case 1, no match
     //
-    int res = kmp("abcdeabcd", "fgh");
-    if (res == -1) {
+    int ret = kmp("abcdeabcd", "fgh");
+    if (ret == -1) {
         printf("case 1 PASS\n");
     } else {
         printf("case 1 FAILED\n");
@@ -110,11 +146,39 @@ int main() {
 
     // case 2, one match
     //
-    res = kmp("abcdeabcd", "eabcd");
-    if (res == 4) {
+    ret = kmp("abcdeabcd", "eabcd");
+    if (ret == 4) {
         printf("case 2 PASS\n");
     } else {
         printf("case 2 FAILED\n");
+    }
+
+    // case 3, no match for kmp_multi
+    //
+    vector<int> res;
+    kmp_multi("abcdeabcd", "fgh", res);
+    if (res.size() == 0) {
+        printf("case 3 PASS\n");
+    } else {
+        printf("case 3 FAILED\n");
+    }
+
+    // case 4, one match 
+    //
+    kmp_multi("abcdeabcd", "eabcd", res);
+    if ((res.size() == 1) && (res[0] == 4)) {
+        printf("case 4 PASS\n");
+    } else {
+        printf("case 4 FAILED\n");
+    }
+
+    // case 5, two match
+    //
+    kmp_multi("abcdab", "ab", res);
+    if ((res.size() == 2) && (res[0] == 0) && (res[1] == 4)) {
+        printf("case 5 PASS\n");
+    } else {
+        printf("case 5 FAILED\n");
     }
 
     return 0;
